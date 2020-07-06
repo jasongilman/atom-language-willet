@@ -1,7 +1,7 @@
 {
   "name": "atom-language-willet",
   "main": "./lib/atom-language-willet",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Provides highlighting for the Willet Language",
   "keywords": [
     "willet"
@@ -11,6 +11,5 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
