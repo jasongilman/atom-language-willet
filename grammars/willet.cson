@@ -1,0 +1,1335 @@
+'scopeName': 'source.willet'
+'fileTypes': [
+  'wlt'
+]
+'name': 'Willet'
+'patterns': [
+  {
+    # [param|(params)] => [expression|{statements}]
+    'begin': '''(?x)
+      (?=
+        (?<![A-Za-z0-9])
+        ((\\(([^\\(\\)]*)?\\))|[\\w$]+)
+        \\s*=>
+      )
+    '''
+    'end': '''(?x)
+      (?<=})|
+      ((?!
+        \\s*{|
+        \\G\\(|
+        \\G[\\w$]+|
+        \\s*/\\*|\\s*//
+      )(?=\\s*\\S))
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        'include': '#function_body'
+      }
+      {
+        'begin': '\\G'
+        'end': '(?<=(=>))'
+        'name': 'meta.function.arrow.willet'
+        'patterns': [
+          {
+            'include': '#arrow_function_innards'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    # [.]foo = ... => ...
+    'begin': '''(?x)
+      (?=
+        (\\.)?[a-zA-Z_$][\\w$]*
+        \\s*(=)\\s*
+        ((\\(([^\\(\\)]*)?\\))|[\\w$]+)
+        \\s*=>
+      )
+    '''
+    'end': '''(?x)
+      (?<=})|
+      ((?!
+        \\s*{|
+        \\G(\\.)?[a-zA-Z_$][\\w$]*\\s*(=)\\s*\\(|
+        \\G(\\.)?[a-zA-Z_$][\\w$]*\\s*(=)\\s*[\\w$]+|
+        \\s*/\\*|\\s*//
+      )(?=\\s*\\S))
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        'include': '#function_body'
+      }
+      {
+        'begin': '\\G'
+        'end': '(?<=(=>))'
+        'name': 'meta.function.arrow.willet'
+        'patterns': [
+          {
+            'match': '\\G(\\.)?([a-zA-Z_$][\\w$]*)\\s*(=)'
+            'captures':
+              '1':
+                'name': 'meta.delimiter.method.period.willet'
+              '2':
+                'name': 'entity.name.function.willet'
+              '3':
+                'name': 'keyword.operator.assignment.willet'
+          }
+          {
+            'include': '#arrow_function_innards'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    # foo: ... => ...
+    'begin': '''(?x)
+      (?=
+        \\b[a-zA-Z_$][\\w$]*
+        \\s*:\\s*
+        ((\\(([^\\(\\)]*)?\\))|[\\w$]+)
+        \\s*=>
+      )
+    '''
+    'end': '''(?x)
+      (?<=})|
+      ((?!
+        \\s*{|
+        \\G[\\w$]+\\s*:|
+        \\s*/\\*|\\s*//
+      )(?=\\s*\\S))
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        'include': '#function_body'
+      }
+      {
+        'begin': '\\G'
+        'end': '(?<=(=>))'
+        'name': 'meta.function.arrow.json.willet'
+        'patterns': [
+          {
+            'match': '\\b([a-zA-Z_$][\\w$]*)\\s*(:)\\s*'
+            'captures':
+              '1':
+                'name': 'entity.name.function.willet'
+              '2':
+                'name': 'keyword.operator.assignment.willet'
+          }
+          {
+            'include': '#arrow_function_innards'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    # "foo": ... => ...
+    'begin': '''(?x)
+      (?=
+        ((\'[^\']*?\')|("[^"]*?"))
+        \\s*:\\s*
+        ((\\(([^\\(\\)]*)?\\))|[\\w$]+)
+        \\s*=>
+      )
+    '''
+    'end': '''(?x)
+      (?<=})|
+      ((?!
+        \\G((\'[^\']*?\')|("[^"]*?"))|
+        \\s*{|
+        \\s*/\\*|\\s*//
+      )(?=\\s*\\S))
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        'include': '#function_body'
+      }
+      {
+        'begin': '\\G'
+        'end': '(?<=(=>))'
+        'name': 'meta.function.arrow.json.willet'
+        'patterns': [
+          {
+            'match': '(?:((\')([^\']*?)(\'))|((")([^"]*?)(")))\\s*(:)'
+            'captures':
+              '1':
+                'name': 'string.quoted.single.willet'
+              '2':
+                'name': 'punctuation.definition.string.begin.willet'
+              '3':
+                'name': 'entity.name.function.willet'
+              '4':
+                'name': 'punctuation.definition.string.end.willet'
+              '5':
+                'name': 'string.quoted.double.willet'
+              '6':
+                'name': 'punctuation.definition.string.begin.willet'
+              '7':
+                'name': 'entity.name.function.willet'
+              '8':
+                'name': 'punctuation.definition.string.end.willet'
+              '9':
+                'name': 'keyword.operator.assignment.willet'
+          }
+          {
+            'include': '#arrow_function_innards'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    'match': '(=>)'
+    'captures':
+      '0':
+        'name': 'meta.function.arrow.willet'
+      '1':
+        'name': 'storage.type.function.arrow.willet'
+  }
+  {
+    'match': '(new)\\s+([\\w$]+[\\w.$]*)'
+    'name': 'meta.class.instance.constructor.willet'
+    'captures':
+      '1':
+        'name': 'keyword.operator.new.willet'
+      '2':
+        'name': 'entity.name.type.instance.willet'
+        'patterns': [
+          {
+            'match': '\\.'
+            'name': 'meta.delimiter.property.period.willet'
+          }
+        ]
+  }
+  {
+    # console
+    # console.log(arg1, "arg2", [...])
+    'begin': '(?<![\\w$])console(?![\\w$]|\\s*:)'
+    'beginCaptures':
+      '0':
+        'name': 'entity.name.type.object.console.willet'
+    'end': '''(?x)
+      (?<=\\)) | (?=
+        (?! (\\s*//)|(\\s*/\\*)|(\\s*(\\.)\\s*
+          (assert|clear|debug|error|info|log|profile|profileEnd|time|timeEnd|warn)
+          \\s*\\(
+        )) \\s*\\S
+      )
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        'begin': '\\s*(\\.)\\s*(\\w+)\\s*(?=\\()'
+        'beginCaptures':
+          '1':
+            'name': 'meta.delimiter.method.period.willet'
+          '2':
+            'name': 'support.function.console.willet'
+        'end': '(?<=\\))'
+        'name': 'meta.method-call.willet'
+        'patterns': [
+          {
+            'include': '#arguments'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    # Math
+    'begin': '(?<![\\w$])Math(?![\\w$]|\\s*:)'
+    'beginCaptures':
+      '0':
+        'name': 'support.class.math.willet'
+    'end': '''(?x)
+      (?<=E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|\\)
+      ) | (?=
+        (?! (\\s*//)|(\\s*/\\*)|(\\s*\\.\\s* (
+          ((abs|acos|acosh|asin|asinh|atan|atan2|atanh|cbrt|ceil|clz32|cos|cosh|exp|
+          expm1|floor|fround|hypot|imul|log|log10|log1p|log2|max|min|pow|random|
+          round|sign|sin|sinh|sqrt|tan|tanh|trunc)\\s*\\(
+          ) | (E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2)(?!\\s*[\\w$(]))
+        )) \\s*\\S
+      )
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        # Math.random()
+        'begin': '\\s*(\\.)\\s*(\\w+)\\s*(?=\\()'
+        'beginCaptures':
+          '1':
+            'name': 'meta.delimiter.method.period.willet'
+          '2':
+            'name': 'support.function.math.willet'
+        'end': '(?<=\\))'
+        'name': 'meta.method-call.willet'
+        'patterns': [
+          {
+            'include': '#arguments'
+          }
+        ]
+      }
+      {
+        # Math.PI
+        'match': '\\s*(\\.)\\s*(\\w+)\\b'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'support.constant.property.math.willet'
+      }
+    ]
+  }
+  {
+    # Promise
+    'begin': '(?<![\\w$])Promise(?![\\w$]|\\s*:)'
+    'beginCaptures':
+      '0':
+        'name': 'support.class.promise.willet'
+    'end': '''(?x)
+      (?<=\\)) | (?=
+        (?! (\\s*//)|(\\s*/\\*)|(\\s*\\.\\s*(all|race|reject|resolve)\\s*\\() )\\s*\\S
+      )
+    '''
+    'patterns': [
+      {
+        'include': '#comments'
+      }
+      {
+        # Promise.all()
+        'begin': '\\s*(\\.)\\s*(\\w+)\\s*(?=\\()'
+        'beginCaptures':
+          '1':
+            'name': 'meta.delimiter.method.period.willet'
+          '2':
+            'name': 'support.function.promise.willet'
+        'end': '(?<=\\))'
+        'name': 'meta.method-call.willet'
+        'patterns': [
+          {
+            'include': '#arguments'
+          }
+        ]
+      }
+    ]
+  }
+  {
+    'include': '#strings'
+  }
+  {
+    'include': '#comments'
+  }
+  {
+    'match': '(?<!\\.)\\b(let)(?!\\s*:)\\b'
+    'name': 'storage.type.var.willet'
+  }
+  {
+    'begin': '(?<!\\.)\\b(const)(?!\\s*:)\\b'
+    'beginCaptures':
+      '1':
+        'name': 'storage.type.const.willet'
+    'end': '(\\bof\\b|\\bin\\b)|(;)|(=)|(?<![,{])\\n'
+    'endCaptures':
+      '1':
+        'name': 'keyword.operator.$1.willet'
+      '2':
+        'name': 'punctuation.terminator.statement.willet'
+      '3':
+        'name': 'keyword.operator.assignment.willet'
+    'patterns': [
+      {
+        'match': '([$_a-zA-Z][$_a-zA-Z0-9]*)\\s*(:)\\s*([$_a-zA-Z][$_a-zA-Z0-9]*)?'
+        'captures':
+          '2':
+            'name': 'keyword.operator.assignment.willet'
+          '3':
+            'name': 'constant.other.willet'
+      }
+      {
+        'match': '([$_a-zA-Z][$_a-zA-Z0-9]*)'
+        'captures':
+          '1':
+            'name': 'constant.other.willet'
+      }
+      {
+        'match': '\\.\\.\\.'
+        'name': 'keyword.operator.spread.willet'
+      }
+      {
+        'match': ','
+        'name': 'meta.delimiter.object.comma.willet'
+      }
+      {
+        'match': '\\(|\\)'
+        'name': 'meta.brace.round.willet'
+      }
+      {
+        'match': '{|}'
+        'name': 'meta.brace.curly.willet'
+      }
+      {
+        'match': '\\[|\\]'
+        'name': 'meta.brace.square.willet'
+      }
+      {
+        'include': '#comments'
+      }
+    ]
+  }
+  {
+    'match': '(?:(?<=\\.{3})|(?<!\\.))\\b(await)(?!\\s*:)\\b'
+    'name': 'keyword.control.willet'
+  }
+  {
+    'match': '(?<!\\.)\\b(catch|else|finally|for|if|elseif|throw|try)(?!\\s*:)\\b'
+    'name': 'keyword.control.willet'
+  }
+  {
+    'match': '(?<!\\.)\\b(delete|new|typeof)(?!\\s*:)\\b'
+    'name': 'keyword.operator.$1.willet'
+  }
+  {
+    'match': '\\.\\.\\.'
+    'name': 'keyword.operator.spread.willet'
+  }
+  {
+    'match': '(?<!\\.)\\b(true|false)(?!\\s*:)\\b'
+    'name': 'constant.language.boolean.$1.willet'
+  }
+  {
+    'match': '(?<!\\.)\\b(null)(?!\\s*:)\\b'
+    'name': 'constant.language.null.willet'
+  }
+  {
+    'match': '''(?x) (?<!\\$) \\b
+      (Array|ArrayBuffer|Atomics|Boolean|DataView|Date|Error|EvalError|Float32Array|Float64Array|Function|Generator
+      |GeneratorFunction|Int16Array|Int32Array|Int8Array|InternalError|Intl|JSON|Map|Number|Object|Proxy
+      |RangeError|ReferenceError|Reflect|RegExp|Set|SharedArrayBuffer|SIMD|String|Symbol|SyntaxError|TypeError
+      |Uint16Array|Uint32Array|Uint8Array|Uint8ClampedArray|URIError|WeakMap|WeakSet)
+      \\b
+    '''
+    'name': 'support.class.willet'
+  }
+  {
+    'match': '''(?x) (\\.) \\s* (?:
+        (constructor|length|prototype) |
+        (EPSILON|MAX_SAFE_INTEGER|MAX_VALUE|MIN_SAFE_INTEGER|MIN_VALUE|NEGATIVE_INFINITY|POSITIVE_INFINITY)
+      )\\b
+    '''
+    'captures':
+      '1':
+        'name': 'meta.delimiter.property.period.willet'
+      '2':
+        'name': 'support.variable.property.willet'
+      '3':
+        'name': 'support.constant.willet'
+  }
+  {
+    'match': '''(?x) (?<!\\$) \\b (?:
+      (document|event|navigator|performance|screen|window)
+      |
+      (AnalyserNode|ArrayBufferView|Attr|AudioBuffer|AudioBufferSourceNode|AudioContext|AudioDestinationNode|AudioListener
+      |AudioNode|AudioParam|BatteryManager|BeforeUnloadEvent|BiquadFilterNode|Blob|BufferSource|ByteString|CSS|CSSConditionRule
+      |CSSCounterStyleRule|CSSGroupingRule|CSSMatrix|CSSMediaRule|CSSPageRule|CSSPrimitiveValue|CSSRule|CSSRuleList|CSSStyleDeclaration
+      |CSSStyleRule|CSSStyleSheet|CSSSupportsRule|CSSValue|CSSValueList|CanvasGradient|CanvasImageSource|CanvasPattern
+      |CanvasRenderingContext2D|ChannelMergerNode|ChannelSplitterNode|CharacterData|ChromeWorker|CloseEvent|Comment|CompositionEvent
+      |Console|ConvolverNode|Coordinates|Credential|CredentialsContainer|Crypto|CryptoKey|CustomEvent|DOMError|DOMException
+      |DOMHighResTimeStamp|DOMImplementation|DOMString|DOMStringList|DOMStringMap|DOMTimeStamp|DOMTokenList|DataTransfer
+      |DataTransferItem|DataTransferItemList|DedicatedWorkerGlobalScope|DelayNode|DeviceProximityEvent|DirectoryEntry
+      |DirectoryEntrySync|DirectoryReader|DirectoryReaderSync|Document|DocumentFragment|DocumentTouch|DocumentType|DragEvent
+      |DynamicsCompressorNode|Element|Entry|EntrySync|ErrorEvent|Event|EventListener|EventSource|EventTarget|FederatedCredential
+      |FetchEvent|File|FileEntry|FileEntrySync|FileException|FileList|FileReader|FileReaderSync|FileSystem|FileSystemSync
+      |FontFace|FormData|GainNode|Gamepad|GamepadButton|GamepadEvent|Geolocation|GlobalEventHandlers|HTMLAnchorElement
+      |HTMLAreaElement|HTMLAudioElement|HTMLBRElement|HTMLBaseElement|HTMLBodyElement|HTMLButtonElement|HTMLCanvasElement
+      |HTMLCollection|HTMLContentElement|HTMLDListElement|HTMLDataElement|HTMLDataListElement|HTMLDialogElement|HTMLDivElement
+      |HTMLDocument|HTMLElement|HTMLEmbedElement|HTMLFieldSetElement|HTMLFontElement|HTMLFormControlsCollection|HTMLFormElement
+      |HTMLHRElement|HTMLHeadElement|HTMLHeadingElement|HTMLHtmlElement|HTMLIFrameElement|HTMLImageElement|HTMLInputElement
+      |HTMLKeygenElement|HTMLLIElement|HTMLLabelElement|HTMLLegendElement|HTMLLinkElement|HTMLMapElement|HTMLMediaElement
+      |HTMLMetaElement|HTMLMeterElement|HTMLModElement|HTMLOListElement|HTMLObjectElement|HTMLOptGroupElement|HTMLOptionElement
+      |HTMLOptionsCollection|HTMLOutputElement|HTMLParagraphElement|HTMLParamElement|HTMLPreElement|HTMLProgressElement
+      |HTMLQuoteElement|HTMLScriptElement|HTMLSelectElement|HTMLShadowElement|HTMLSourceElement|HTMLSpanElement|HTMLStyleElement
+      |HTMLTableCaptionElement|HTMLTableCellElement|HTMLTableColElement|HTMLTableDataCellElement|HTMLTableElement|HTMLTableHeaderCellElement
+      |HTMLTableRowElement|HTMLTableSectionElement|HTMLTextAreaElement|HTMLTimeElement|HTMLTitleElement|HTMLTrackElement
+      |HTMLUListElement|HTMLUnknownElement|HTMLVideoElement|HashChangeEvent|History|IDBCursor|IDBCursorWithValue|IDBDatabase
+      |IDBEnvironment|IDBFactory|IDBIndex|IDBKeyRange|IDBMutableFile|IDBObjectStore|IDBOpenDBRequest|IDBRequest|IDBTransaction
+      |IDBVersionChangeEvent|IIRFilterNode|IdentityManager|ImageBitmap|ImageBitmapFactories|ImageData|Index|InputDeviceCapabilities
+      |InputEvent|InstallEvent|InstallTrigger|KeyboardEvent|LinkStyle|LocalFileSystem|LocalFileSystemSync|Location|MIDIAccess
+      |MIDIConnectionEvent|MIDIInput|MIDIInputMap|MIDIOutputMap|MediaElementAudioSourceNode|MediaError|MediaKeyMessageEvent
+      |MediaKeySession|MediaKeyStatusMap|MediaKeySystemAccess|MediaKeySystemConfiguration|MediaKeys|MediaRecorder|MediaStream
+      |MediaStreamAudioDestinationNode|MediaStreamAudioSourceNode|MessageChannel|MessageEvent|MessagePort|MouseEvent
+      |MutationObserver|MutationRecord|NamedNodeMap|Navigator|NavigatorConcurrentHardware|NavigatorGeolocation|NavigatorID
+      |NavigatorLanguage|NavigatorOnLine|Node|NodeFilter|NodeIterator|NodeList|NonDocumentTypeChildNode|Notification
+      |OfflineAudioCompletionEvent|OfflineAudioContext|OscillatorNode|PageTransitionEvent|PannerNode|ParentNode|PasswordCredential
+      |Path2D|PaymentAddress|PaymentRequest|PaymentResponse|Performance|PerformanceEntry|PerformanceFrameTiming|PerformanceMark
+      |PerformanceMeasure|PerformanceNavigation|PerformanceNavigationTiming|PerformanceObserver|PerformanceObserverEntryList
+      |PerformanceResourceTiming|PerformanceTiming|PeriodicSyncEvent|PeriodicWave|Plugin|Point|PointerEvent|PopStateEvent
+      |PortCollection|Position|PositionError|PositionOptions|PresentationConnectionClosedEvent|PresentationConnectionList
+      |PresentationReceiver|ProcessingInstruction|ProgressEvent|PromiseRejectionEvent|PushEvent|PushRegistrationManager
+      |RTCCertificate|RTCConfiguration|RTCPeerConnection|RTCSessionDescriptionCallback|RTCStatsReport|RadioNodeList|RandomSource
+      |Range|ReadableByteStream|RenderingContext|SVGAElement|SVGAngle|SVGAnimateColorElement|SVGAnimateElement|SVGAnimateMotionElement
+      |SVGAnimateTransformElement|SVGAnimatedAngle|SVGAnimatedBoolean|SVGAnimatedEnumeration|SVGAnimatedInteger|SVGAnimatedLength
+      |SVGAnimatedLengthList|SVGAnimatedNumber|SVGAnimatedNumberList|SVGAnimatedPoints|SVGAnimatedPreserveAspectRatio
+      |SVGAnimatedRect|SVGAnimatedString|SVGAnimatedTransformList|SVGAnimationElement|SVGCircleElement|SVGClipPathElement
+      |SVGCursorElement|SVGDefsElement|SVGDescElement|SVGElement|SVGEllipseElement|SVGEvent|SVGFilterElement|SVGFontElement
+      |SVGFontFaceElement|SVGFontFaceFormatElement|SVGFontFaceNameElement|SVGFontFaceSrcElement|SVGFontFaceUriElement
+      |SVGForeignObjectElement|SVGGElement|SVGGlyphElement|SVGGradientElement|SVGHKernElement|SVGImageElement|SVGLength
+      |SVGLengthList|SVGLineElement|SVGLinearGradientElement|SVGMPathElement|SVGMaskElement|SVGMatrix|SVGMissingGlyphElement
+      |SVGNumber|SVGNumberList|SVGPathElement|SVGPatternElement|SVGPoint|SVGPolygonElement|SVGPolylineElement|SVGPreserveAspectRatio
+      |SVGRadialGradientElement|SVGRect|SVGRectElement|SVGSVGElement|SVGScriptElement|SVGSetElement|SVGStopElement|SVGStringList
+      |SVGStylable|SVGStyleElement|SVGSwitchElement|SVGSymbolElement|SVGTRefElement|SVGTSpanElement|SVGTests|SVGTextElement
+      |SVGTextPositioningElement|SVGTitleElement|SVGTransform|SVGTransformList|SVGTransformable|SVGUseElement|SVGVKernElement
+      |SVGViewElement|ServiceWorker|ServiceWorkerContainer|ServiceWorkerGlobalScope|ServiceWorkerRegistration|ServiceWorkerState
+      |ShadowRoot|SharedWorker|SharedWorkerGlobalScope|SourceBufferList|StereoPannerNode|Storage|StorageEvent|StyleSheet
+      |StyleSheetList|SubtleCrypto|SyncEvent|Text|TextMetrics|TimeEvent|TimeRanges|Touch|TouchEvent|TouchList|Transferable
+      |TreeWalker|UIEvent|USVString|VRDisplayCapabilities|ValidityState|WaveShaperNode|WebGL|WebGLActiveInfo|WebGLBuffer
+      |WebGLContextEvent|WebGLFramebuffer|WebGLProgram|WebGLRenderbuffer|WebGLRenderingContext|WebGLShader|WebGLShaderPrecisionFormat
+      |WebGLTexture|WebGLTimerQueryEXT|WebGLTransformFeedback|WebGLUniformLocation|WebGLVertexArrayObject|WebGLVertexArrayObjectOES
+      |WebSocket|WebSockets|WebVTT|WheelEvent|Window|WindowBase64|WindowEventHandlers|WindowTimers|Worker|WorkerGlobalScope
+      |WorkerLocation|WorkerNavigator|XMLHttpRequest|XMLHttpRequestEventTarget|XMLSerializer|XPathExpression|XPathResult
+      |XSLTProcessor)
+    )\\b
+    '''
+    'captures':
+      '1':
+        'name': 'support.variable.dom.willet'
+      '2':
+        'name': 'support.class.dom.willet'
+  }
+  {
+    'match': '''(?x) (\\.) \\s*
+      (?:
+        (ATTRIBUTE_NODE|CDATA_SECTION_NODE|COMMENT_NODE|DOCUMENT_FRAGMENT_NODE|DOCUMENT_NODE|DOCUMENT_TYPE_NODE
+        |DOMSTRING_SIZE_ERR|ELEMENT_NODE|ENTITY_NODE|ENTITY_REFERENCE_NODE|HIERARCHY_REQUEST_ERR|INDEX_SIZE_ERR
+        |INUSE_ATTRIBUTE_ERR|INVALID_CHARACTER_ERR|NO_DATA_ALLOWED_ERR|NO_MODIFICATION_ALLOWED_ERR|NOT_FOUND_ERR
+        |NOT_SUPPORTED_ERR|NOTATION_NODE|PROCESSING_INSTRUCTION_NODE|TEXT_NODE|WRONG_DOCUMENT_ERR)
+        |
+        (_content|[xyz]|abbr|above|accept|acceptCharset|accessKey|action|align|[av]Link(?:color)?|all|alt|anchors|appCodeName
+        |appCore|applets|appMinorVersion|appName|appVersion|archive|areas|arguments|attributes|availHeight|availLeft|availTop
+        |availWidth|axis|background|backgroundColor|backgroundImage|below|bgColor|body|border|borderBottomWidth|borderColor
+        |borderLeftWidth|borderRightWidth|borderStyle|borderTopWidth|borderWidth|bottom|bufferDepth|callee|caller|caption
+        |cellPadding|cells|cellSpacing|ch|characterSet|charset|checked|childNodes|chOff|cite|classes|className|clear
+        |clientInformation|clip|clipBoardData|closed|code|codeBase|codeType|color|colorDepth|cols|colSpan|compact|complete
+        |components|content|controllers|cookie|cookieEnabled|cords|cpuClass|crypto|current|data|dateTime|declare|defaultCharset
+        |defaultChecked|defaultSelected|defaultStatus|defaultValue|defaultView|defer|description|dialogArguments|dialogHeight
+        |dialogLeft|dialogTop|dialogWidth|dir|directories|disabled|display|docmain|doctype|documentElement|elements|embeds
+        |enabledPlugin|encoding|enctype|entities|event|expando|external|face|fgColor|filename|firstChild|fontFamily|fontSize
+        |fontWeight|form|formName|forms|frame|frameBorder|frameElement|frames|hasFocus|hash|headers|height|history|host
+        |hostname|href|hreflang|hspace|htmlFor|httpEquiv|id|ids|ignoreCase|images|implementation|index|innerHeight|innerWidth
+        |input|isMap|label|lang|language|lastChild|lastIndex|lastMatch|lastModified|lastParen|layer[sXY]|left|leftContext
+        |lineHeight|link|linkColor|links|listStyleType|localName|location|locationbar|longDesc|lowsrc|lowSrc|marginBottom
+        |marginHeight|marginLeft|marginRight|marginTop|marginWidth|maxLength|media|menubar|method|mimeTypes|multiline|multiple
+        |name|nameProp|namespaces|namespaceURI|next|nextSibling|nodeName|nodeType|nodeValue|noHref|noResize|noShade|notationName
+        |notations|noWrap|object|offscreenBuffering|onLine|onreadystatechange|opener|opsProfile|options|oscpu|outerHeight
+        |outerWidth|ownerDocument|paddingBottom|paddingLeft|paddingRight|paddingTop|page[XY]|page[XY]Offset|parent|parentLayer
+        |parentNode|parentWindow|pathname|personalbar|pixelDepth|pkcs11|platform|plugins|port|prefix|previous|previousDibling
+        |product|productSub|profile|profileend|prompt|prompter|protocol|publicId|readOnly|readyState|referrer|rel|responseText
+        |responseXML|rev|right|rightContext|rowIndex|rows|rowSpan|rules|scheme|scope|screen[XY]|screenLeft|screenTop|scripts
+        |scrollbars|scrolling|sectionRowIndex|security|securityPolicy|selected|selectedIndex|selection|self|shape|siblingAbove
+        |siblingBelow|size|source|specified|standby|start|status|statusbar|statusText|style|styleSheets|suffixes|summary
+        |systemId|systemLanguage|tagName|tags|target|tBodies|text|textAlign|textDecoration|textIndent|textTransform|tFoot|tHead
+        |title|toolbar|top|type|undefined|uniqueID|updateInterval|URL|URLUnencoded|useMap|userAgent|userLanguage|userProfile
+        |vAlign|value|valueType|vendor|vendorSub|version|visibility|vspace|whiteSpace|width|X[MS]LDocument|zIndex)
+      )
+      \\b
+    '''
+    'captures':
+      '1':
+        'name': 'meta.delimiter.property.period.willet'
+      '2':
+        'name': 'support.constant.dom.willet'
+      '3':
+        'name': 'support.variable.property.dom.willet'
+  }
+  {
+    'match': '(?<!\\.)\\b(module|exports|__filename|__dirname|global|process)(?!\\s*:)\\b'
+    'name': 'support.variable.willet'
+  }
+  {
+    'match': '\\b(Infinity|NaN|undefined)\\b'
+    'name': 'constant.language.willet'
+  }
+  {
+    'begin': '(?<=[\\[{=(?:+*,!~-]|^|return|=>|&&|\\|\\|)\\s*(/)(?![/*+?])(?=.*/)'
+    'beginCaptures':
+      '1':
+        'name': 'punctuation.definition.string.begin.willet'
+    'end': '(/)([gimsuy]*)'
+    'endCaptures':
+      '1':
+        'name': 'punctuation.definition.string.end.willet'
+      '2':
+        'name': 'meta.flag.regexp'
+    'name': 'string.regexp.willet'
+    'patterns': [
+      {
+        'include': 'source.js.regexp'
+      }
+    ]
+  }
+  {
+    'include': '#operators'
+  }
+  {
+    'include': '#method_calls'
+  }
+  {
+    'include': '#function_calls'
+  }
+  {
+    'include': '#numbers'
+  }
+  {
+    'include': '#objects'
+  }
+  {
+    'include': '#properties'
+  }
+  {
+    'match': '((?<!\\.|[\\w$])(?![_\\$]+[^A-Z0-9_$])\\$*\\b(?:[A-Z_$][A-Z0-9_$]*)\\b\\$*)'
+    'name': 'constant.other.willet'
+  }
+  {
+    'match': '(?<!\\$)\\b[0-9]+[\\w$]*'
+    'name': 'invalid.illegal.identifier.willet'
+  }
+  {
+    'match': '\\;'
+    'name': 'punctuation.terminator.statement.willet'
+  }
+  {
+    'match': ','
+    'name': 'meta.delimiter.object.comma.willet'
+  }
+  {
+    'match': '\\.'
+    'name': 'meta.delimiter.method.period.willet'
+  }
+  {
+    # Allows the special return snippet to fire.
+    'match': '({)(})'
+    'captures':
+      '1':
+        'name': 'punctuation.section.scope.begin.willet'
+      '2':
+        'name': 'punctuation.section.scope.end.willet'
+  }
+  {
+    'begin': '{'
+    'beginCaptures':
+      '0':
+        'name': 'meta.brace.curly.willet'
+    'end': '}'
+    'endCaptures':
+      '0':
+        'name': 'meta.brace.curly.willet'
+    'patterns': [
+      {
+        'include': '$self'
+      }
+    ]
+  }
+  {
+    'begin': '\\('
+    'beginCaptures':
+      '0':
+        'name': 'meta.brace.round.willet'
+    'end': '\\)'
+    'endCaptures':
+      '0':
+        'name': 'meta.brace.round.willet'
+    'patterns': [
+      {
+        'include': '$self'
+      }
+    ]
+  }
+  {
+    'match': '\\[|\\]'
+    'name': 'meta.brace.square.willet'
+  }
+  {
+    'match': '\\A#!.*$'
+    'name': 'comment.line.shebang.willet'
+  }
+]
+'repository':
+  'numbers':
+    'patterns': [
+      {
+        'match': '\\b(?<!\\$)0(x|X)[0-9a-fA-F]+n?\\b(?!\\$)'
+        'name': 'constant.numeric.hex.willet'
+      }
+      {
+        'match': '\\b(?<!\\$)0(b|B)[01]+n?\\b(?!\\$)'
+        'name': 'constant.numeric.binary.willet'
+      }
+      {
+        'match': '\\b(?<!\\$)0(o|O)?[0-7]+n?\\b(?!\\$)'
+        'name': 'constant.numeric.octal.willet'
+      }
+      {
+        'match': '''(?x)
+          (?<!\\$)(?:
+            (?:\\b[0-9]+(\\.)[0-9]+[eE][+-]?[0-9]+\\b)| # 1.1E+3
+            (?:\\b[0-9]+(\\.)[eE][+-]?[0-9]+\\b)|       # 1.E+3
+            (?:\\B(\\.)[0-9]+[eE][+-]?[0-9]+\\b)|       # .1E+3
+            (?:\\b[0-9]+[eE][+-]?[0-9]+\\b)|            # 1E+3
+            (?:\\b[0-9]+(\\.)[0-9]+\\b)|                # 1.1
+            (?:\\b[0-9]+(\\.)\\B)|                      # 1.
+            (?:\\B(\\.)[0-9]+\\b)|                      # .1
+            (?:\\b[0-9]+n?\\b(?!\\.))                   # 1n
+          )(?!\\$)
+        '''
+        'captures':
+          '0':
+            'name': 'constant.numeric.decimal.willet'
+          '1':
+            'name': 'meta.delimiter.decimal.period.willet'
+          '2':
+            'name': 'meta.delimiter.decimal.period.willet'
+          '3':
+            'name': 'meta.delimiter.decimal.period.willet'
+          '4':
+            'name': 'meta.delimiter.decimal.period.willet'
+          '5':
+            'name': 'meta.delimiter.decimal.period.willet'
+          '6':
+            'name': 'meta.delimiter.decimal.period.willet'
+      }
+    ]
+  'operators':
+    'patterns': [
+      {
+        'match': '%=|\\+=|-=|\\*=|(?<!\\()/='
+        'name': 'keyword.operator.assignment.compound.willet'
+      }
+      {
+        'match': '&=|\\^=|<<=|>>=|>>>=|\\|='
+        'name': 'keyword.operator.assignment.compound.bitwise.willet'
+      }
+      {
+        'match': '<<|>>>|>>'
+        'name': 'keyword.operator.bitwise.shift.willet'
+      }
+      {
+        'match': '!=|<=|>=|==|<|>'
+        'name': 'keyword.operator.comparison.willet'
+      }
+      {
+        'match': '&&|!!|!|\\|\\|'
+        'name': 'keyword.operator.logical.willet'
+      }
+      {
+        'match': '&|\\||\\^|~'
+        'name': 'keyword.operator.bitwise.willet'
+      }
+      {
+        'match': '=|:'
+        'name': 'keyword.operator.assignment.willet'
+      }
+      {
+        'match': '%|\\*|/|-|\\+'
+        'name': 'keyword.operator.willet'
+      }
+    ]
+  'strings':
+    'patterns': [
+      {
+        'begin': '\''
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '\''
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.single.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+        ]
+      }
+      {
+        'begin': '"'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '"'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.double.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+        ]
+      }
+      {
+        'begin': '((\\w+)?(html|HTML|Html))\\s*(`)'
+        'beginCaptures':
+          '1':
+            'name': 'entity.name.function.willet'
+          '4':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '`'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.template.html.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+          {
+            'include': '#interpolated_js'
+          }
+          {
+            'include': 'text.html.basic'
+          }
+        ]
+      }
+      {
+        'begin': '(?<=innerHTML)\\s*(\\+?=)\\s*(?=`)'
+        'beginCaptures':
+          '1':
+            'name': 'keyword.operator.assignment.willet'
+        'end': '(?<=`)'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'contentName': 'string.quoted.template.html.willet'
+        'patterns': [
+          {
+            'begin': '`'
+            'beginCaptures':
+              '0':
+                'name': 'punctuation.definition.string.begin.willet'
+            'end': '`'
+            'endCaptures':
+              '0':
+                'name': 'punctuation.definition.string.end.willet'
+            'patterns': [
+              {
+                'include': '#string_escapes'
+              }
+              {
+                'include': '#interpolated_js'
+              }
+              {
+                'include': 'text.html.basic'
+              }
+            ]
+          }
+        ]
+      }
+      {
+        'begin': '(Relay\\.QL|gql)\\s*(`)'
+        'beginCaptures':
+          '1':
+            'name': 'entity.name.function.willet'
+          '2':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '`'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.template.graphql.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+          {
+            'include': '#interpolated_js'
+          }
+          {
+            'include': 'source.graphql'
+          }
+        ]
+      }
+      {
+        'begin': '(sql|SQL|Sql)\\s*(`)'
+        'beginCaptures':
+          '1':
+            'name': 'entity.name.function.willet'
+          '2':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '`'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.template.sql.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+          {
+            'include': '#interpolated_js'
+          }
+          {
+            'include': 'source.sql'
+          }
+        ]
+      }
+      {
+        'begin': '`'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.string.begin.willet'
+        'end': '`'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.string.end.willet'
+        'name': 'string.quoted.template.willet'
+        'patterns': [
+          {
+            'include': '#string_escapes'
+          }
+          {
+            'include': '#interpolated_js'
+          }
+        ]
+      }
+    ]
+  'string_escapes':
+    'patterns': [
+      {
+        'match': '\\\\u(?![A-Fa-f0-9]{4}|{[A-Fa-f0-9]+})[^\'"]*'
+        'name': 'invalid.illegal.unicode-escape.willet'
+      }
+      {
+        'match': '\\\\u(?:[A-Fa-f0-9]{4}|({)([A-Fa-f0-9]+)(}))'
+        'name': 'constant.character.escape.willet'
+        'captures':
+          '1':
+            'name': 'punctuation.definition.unicode-escape.begin.bracket.curly.willet'
+          '2':
+            'patterns': [
+              {
+                # Max codepoint: \u{10FFFF}
+                'match': '[A-Fa-f\\d]{7,}|(?!10)[A-Fa-f\\d]{6}'
+                'name': 'invalid.illegal.unicode-escape.willet'
+              }
+            ]
+          '3':
+            'name': 'punctuation.definition.unicode-escape.end.bracket.curly.willet'
+      }
+      {
+        'match': '\\\\(x[0-9A-Fa-f]{2}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.)'
+        'name': 'constant.character.escape.willet'
+      }
+    ]
+  'function_params':
+    'patterns': [
+      {
+        'begin': '\\('
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.parameters.begin.bracket.round.willet'
+        'end': '\\)'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.parameters.end.bracket.round.willet'
+        'name': 'meta.parameters.willet'
+        'patterns': [
+          {
+            'match': '(\\.\\.\\.)([a-zA-Z_$][\\w$]*)'
+            'captures':
+              '1':
+                'name': 'keyword.operator.spread.willet'
+              '2':
+                'name': 'variable.parameter.rest.function.willet'
+          }
+          {
+            'include': '$self'
+          }
+          {
+            'match': '[a-zA-Z_$][\\w$]*'
+            'name': 'variable.parameter.function.willet'
+          }
+        ]
+      }
+    ]
+  'function_body':
+    'patterns': [
+      {
+        'begin': '{'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.function.body.begin.bracket.curly.willet'
+        'end': '}'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.function.body.end.bracket.curly.willet'
+        'patterns': [
+          {
+            'include': '$self'
+          }
+        ]
+      }
+    ]
+  'arrow_function_innards':
+    'patterns': [
+      {
+        'match': '=>'
+        'name': 'storage.type.function.arrow.willet'
+      }
+      {
+        'include': '#function_params'
+      }
+      {
+        'match': '([a-zA-Z_$][\\w$]*)(?=\\s*=>)'
+        'captures':
+          '0':
+            'name': 'meta.parameters.willet'
+          '1':
+            'name': 'variable.parameter.function.willet'
+      }
+      {
+        'match': '(\\d[\\w$]*)'
+        'captures':
+          '0':
+            'name': 'meta.parameters.willet'
+          '1':
+            'name': 'invalid.illegal.identifier.willet'
+      }
+    ]
+  'arguments':
+    'patterns': [
+      {
+        'begin': '\\('
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.arguments.begin.bracket.round.willet'
+        'end': '\\)'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.arguments.end.bracket.round.willet'
+        'name': 'meta.arguments.willet'
+        'patterns': [
+          {
+            'include': '$self'
+          }
+        ]
+      }
+    ]
+  'method_calls':
+    'patterns': [
+      {
+        # .methodCall(arg1, "arg2", [...])
+        'begin': '(\\.)\\s*([\\w$]+)\\s*(?=\\()'
+        'beginCaptures':
+          '1':
+            'name': 'meta.delimiter.method.period.willet'
+          '2':
+            'patterns': [
+              {
+                'match': '''(?x)
+                  \\bon(Rowsinserted|Rowsdelete|Rowenter|Rowexit|Resize|Resizestart|Resizeend|Reset|
+                  Readystatechange|Mouseout|Mouseover|Mousedown|Mouseup|Mousemove|
+                  Before(cut|deactivate|unload|update|paste|print|editfocus|activate)|
+                  Blur|Scrolltop|Submit|Select|Selectstart|Selectionchange|Hover|Help|
+                  Change|Contextmenu|Controlselect|Cut|Cellchange|Clock|Close|Deactivate|
+                  Datasetchanged|Datasetcomplete|Dataavailable|Drop|Drag|Dragstart|Dragover|
+                  Dragdrop|Dragenter|Dragend|Dragleave|Dblclick|Unload|Paste|Propertychange|Error|
+                  Errorupdate|Keydown|Keyup|Keypress|Focus|Load|Activate|Afterupdate|Afterprint|Abort)\\b
+                '''
+                'name': 'support.function.event-handler.willet'
+              }
+              {
+                'match': '''(?x)
+                  \\b(catch|finally|then|shift|showModelessDialog|showModalDialog|showHelp|scroll|scrollX|scrollByPages|
+                  scrollByLines|scrollY|scrollTo|stop|strike|sizeToContent|sidebar|signText|sort|
+                  sup|sub|substr|substring|splice|split|send|set(Milliseconds|Seconds|Minutes|Hours|
+                  Month|Year|FullYear|Date|UTC(Milliseconds|Seconds|Minutes|Hours|Month|FullYear|Date)|
+                  Time|Hotkeys|Cursor|ZOptions|Active|Resizable|RequestHeader)|search|slice|
+                  savePreferences|small|home|handleEvent|navigate|char|charCodeAt|charAt|concat|
+                  contextual|confirm|compile|clear|captureEvents|call|createStyleSheet|createPopup|
+                  createEventObject|to(GMTString|UTCString|String|Source|UpperCase|LowerCase|LocaleString)|
+                  test|taint|taintEnabled|indexOf|italics|disableExternalCapture|dump|detachEvent|unshift|
+                  untaint|unwatch|updateCommands|join|javaEnabled|pop|push|plugins.refresh|paddings|parse|stringify|
+                  print|prompt|preference|enableExternalCapture|exec|execScript|valueOf|UTC|find|file|
+                  fileModifiedDate|fileSize|fileCreatedDate|fileUpdatedDate|fixed|fontsize|fontcolor|
+                  forward|fromCharCode|watch|link|load|lastIndexOf|anchor|attachEvent|atob|apply|alert|
+                  abort|routeEvents|resize|resizeBy|resizeTo|recalc|returnValue|replace|reverse|reload|
+                  releaseCapture|releaseEvents|go|get(Milliseconds|Seconds|Minutes|Hours|Month|Day|Year|FullYear|
+                  Time|Date|TimezoneOffset|UTC(Milliseconds|Seconds|Minutes|Hours|Day|Month|FullYear|Date)|
+                  Attention|Selection|ResponseHeader|AllResponseHeaders)|moveBy|moveBelow|moveTo|
+                  moveToAbsolute|moveAbove|mergeAttributes|match|margins|btoa|big|bold|borderWidths|blink|back)\\b
+                '''
+                'name': 'support.function.willet'
+              }
+              {
+                'match': '''(?x)
+                  \\b(acceptNode|add|addEventListener|addTextTrack|adoptNode|after|animate|append|
+                  appendChild|appendData|before|blur|canPlayType|captureStream|
+                  caretPositionFromPoint|caretRangeFromPoint|checkValidity|clear|click|
+                  cloneContents|cloneNode|cloneRange|close|closest|collapse|
+                  compareBoundaryPoints|compareDocumentPosition|comparePoint|contains|
+                  convertPointFromNode|convertQuadFromNode|convertRectFromNode|createAttribute|
+                  createAttributeNS|createCaption|createCDATASection|createComment|
+                  createContextualFragment|createDocument|createDocumentFragment|
+                  createDocumentType|createElement|createElementNS|createEntityReference|
+                  createEvent|createExpression|createHTMLDocument|createNodeIterator|
+                  createNSResolver|createProcessingInstruction|createRange|createShadowRoot|
+                  createTBody|createTextNode|createTFoot|createTHead|createTreeWalker|delete|
+                  deleteCaption|deleteCell|deleteContents|deleteData|deleteRow|deleteTFoot|
+                  deleteTHead|detach|disconnect|dispatchEvent|elementFromPoint|elementsFromPoint|
+                  enableStyleSheetsForSet|entries|evaluate|execCommand|exitFullscreen|
+                  exitPointerLock|expand|extractContents|fastSeek|firstChild|focus|forEach|get|
+                  getAll|getAnimations|getAttribute|getAttributeNames|getAttributeNode|
+                  getAttributeNodeNS|getAttributeNS|getBoundingClientRect|getBoxQuads|
+                  getClientRects|getContext|getDestinationInsertionPoints|getElementById|
+                  getElementsByClassName|getElementsByName|getElementsByTagName|
+                  getElementsByTagNameNS|getItem|getNamedItem|getSelection|getStartDate|
+                  getVideoPlaybackQuality|has|hasAttribute|hasAttributeNS|hasAttributes|
+                  hasChildNodes|hasFeature|hasFocus|importNode|initEvent|insertAdjacentElement|
+                  insertAdjacentHTML|insertAdjacentText|insertBefore|insertCell|insertData|
+                  insertNode|insertRow|intersectsNode|isDefaultNamespace|isEqualNode|
+                  isPointInRange|isSameNode|item|key|keys|lastChild|load|lookupNamespaceURI|
+                  lookupPrefix|matches|move|moveAttribute|moveAttributeNode|moveChild|
+                  moveNamedItem|namedItem|nextNode|nextSibling|normalize|observe|open|
+                  parentNode|pause|play|postMessage|prepend|preventDefault|previousNode|
+                  previousSibling|probablySupportsContext|queryCommandEnabled|
+                  queryCommandIndeterm|queryCommandState|queryCommandSupported|queryCommandValue|
+                  querySelector|querySelectorAll|registerContentHandler|registerElement|
+                  registerProtocolHandler|releaseCapture|releaseEvents|remove|removeAttribute|
+                  removeAttributeNode|removeAttributeNS|removeChild|removeEventListener|
+                  removeItem|replace|replaceChild|replaceData|replaceWith|reportValidity|
+                  requestFullscreen|requestPointerLock|reset|scroll|scrollBy|scrollIntoView|
+                  scrollTo|seekToNextFrame|select|selectNode|selectNodeContents|set|setAttribute|
+                  setAttributeNode|setAttributeNodeNS|setAttributeNS|setCapture|
+                  setCustomValidity|setEnd|setEndAfter|setEndBefore|setItem|setNamedItem|
+                  setRangeText|setSelectionRange|setSinkId|setStart|setStartAfter|setStartBefore|
+                  slice|splitText|stepDown|stepUp|stopImmediatePropagation|stopPropagation|
+                  submit|substringData|supports|surroundContents|takeRecords|terminate|toBlob|
+                  toDataURL|toggle|toString|values|write|writeln)\\b
+                '''
+                'name': 'support.function.dom.willet'
+              }
+              {
+                'match': "[a-zA-Z_$][\\w$]*"
+                'name': 'entity.name.function.willet'
+              }
+              {
+                'match': '\\d[\\w$]*'
+                'name': 'invalid.illegal.identifier.willet'
+              }
+            ]
+        'end': '(?<=\\))'
+        'name': 'meta.method-call.willet'
+        'patterns': [
+          {
+            'include': '#arguments'
+          }
+        ]
+      }
+    ]
+  'function_calls':
+    'patterns': [
+      {
+        # functionCall(arg1, "arg2", [...])
+        'begin': '([\\w$]+)\\s*(?=\\()'
+        'beginCaptures':
+          '1':
+            'patterns': [
+              {
+                'match': '''(?x)
+                  \\b(isNaN|isFinite|eval|uneval|parseInt|parseFloat|decodeURI|
+                  decodeURIComponent|encodeURI|encodeURIComponent|escape|unescape|
+                  require|set(Interval|Timeout)|clear(Interval|Timeout))\\b
+                '''
+                'name': 'support.function.willet'
+              }
+              {
+                'match': "[a-zA-Z_$][\\w$]*"
+                'name': 'entity.name.function.willet'
+              }
+              {
+                'match': '\\d[\\w$]*'
+                'name': 'invalid.illegal.identifier.willet'
+              }
+            ]
+        'end': '(?<=\\))'
+        'name': 'meta.function-call.willet'
+        'patterns': [
+          {
+            'include': '#arguments'
+          }
+        ]
+      }
+    ]
+  'objects':
+    'patterns': [
+      {
+        # OBJ in OBJ.prop, OBJ.methodCall()
+        'match': '[A-Z][A-Z0-9_$]*(?=\\s*\\.\\s*[a-zA-Z_$]\\w*)'
+        'name': 'constant.other.object.willet'
+      }
+      {
+        # obj in obj.prop, obj.methodCall()
+        'match': '[a-zA-Z_$][\\w$]*(?=\\s*\\.\\s*[a-zA-Z_$]\\w*)'
+        'name': 'variable.other.object.willet'
+      }
+    ]
+  'properties':
+    'patterns': [
+      {
+        # PROP1 in obj.PROP1.prop2, func().PROP1.prop2
+        'match': '(\\.)\\s*([A-Z][A-Z0-9_$]*\\b\\$*)(?=\\s*\\.\\s*[a-zA-Z_$]\\w*)'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'constant.other.object.property.willet'
+      }
+      {
+        # prop1 in obj.prop1.prop2, func().prop1.prop2
+        'match': '(\\.)\\s*(\\$*[a-zA-Z_$][\\w$]*)(?=\\s*\\.\\s*[a-zA-Z_$]\\w*)'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'variable.other.object.property.willet'
+      }
+      {
+        # PROP in obj.PROP, func().PROP
+        'match': '(\\.)\\s*([A-Z][A-Z0-9_$]*\\b\\$*)'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'constant.other.property.willet'
+      }
+      {
+        # prop in obj.prop, func().prop
+        'match': '(\\.)\\s*(\\$*[a-zA-Z_$][\\w$]*)'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'variable.other.property.willet'
+      }
+      {
+        # 123illegal in obj.123illegal, func().123illegal
+        'match': '(\\.)\\s*([0-9][\\w$]*)'
+        'captures':
+          '1':
+            'name': 'meta.delimiter.property.period.willet'
+          '2':
+            'name': 'invalid.illegal.identifier.willet'
+      }
+    ]
+  'interpolated_js':
+    'patterns': [
+      {
+        'begin': '\\${'
+        'captures':
+          '0':
+            'name': 'punctuation.section.embedded.willet'
+        'end': '}'
+        'name': 'source.js.embedded.source'
+        'patterns': [
+          {
+            'begin': '{'
+            'beginCaptures':
+              '0':
+                'name': 'meta.brace.curly.willet'
+            'end': '}'
+            'endCaptures':
+              '0':
+                'name': 'meta.brace.curly.willet'
+            'patterns': [
+              {
+                'include': '$self'
+              }
+            ]
+          }
+          {
+            'include': '$self'
+          }
+        ]
+      }
+    ]
+  'comments':
+    'patterns': [
+      {
+        'captures':
+          '1':
+            'name': 'punctuation.definition.comment.begin.willet'
+          '2':
+            'name': 'punctuation.definition.comment.end.willet'
+        'match': '(/\\*)(\\*/)'
+        'name': 'comment.block.empty.willet'
+      }
+      {
+        'begin': '/\\*\\*'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.comment.begin.willet'
+        'end': '\\*/'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.comment.end.willet'
+        'name': 'comment.block.documentation.willet'
+        'patterns': [
+          {
+            'include': 'source.jsdoc'
+          }
+        ]
+      }
+      {
+        'begin': '/\\*'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.comment.begin.willet'
+        'end': '\\*/'
+        'endCaptures':
+          '0':
+            'name': 'punctuation.definition.comment.end.willet'
+        'name': 'comment.block.willet'
+      }
+      {
+        'begin': '//'
+        'beginCaptures':
+          '0':
+            'name': 'punctuation.definition.comment.willet'
+        'end': '$'
+        'name': 'comment.line.double-slash.willet'
+      }
+    ]
+  'prevent_object_keys_matching':
+    'patterns': [
+      {
+        # e.g. don't treat null as an object key in
+        # ? null :
+        # case null:
+        'match': '(\\w+)(?=\\s*:)'
+        'captures':
+          '1':
+            'patterns': [
+              'include': '$self'
+            ]
+      }
+    ]
