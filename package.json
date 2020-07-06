@@ -2,7 +2,7 @@
   "name": "atom-language-willet",
   "main": "./lib/atom-language-willet",
   "version": "0.0.1",
-  "description": "A short description of your package",
+  "description": "Provides highlighting for the Willet Language",
   "keywords": [
   ],
   "repository": "https://github.com/jasongilman/atom-language-willet",

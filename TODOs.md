@@ -1,0 +1,10 @@
+TODOs
+- Make semicolons optional
+- make commas optional
+- Maps
+- Sets
+- Arrow functions start with # (maybe line 1002 or around there)
+- Blocks by themselves
+- defmacro
+- function calls without parentheses, just a block
+- annotations
