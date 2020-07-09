@@ -8,3 +8,5 @@ TODOs
 - defmacro
 - function calls without parentheses, just a block
 - annotations
+- `:thiskindofstring`
+- Snippets
