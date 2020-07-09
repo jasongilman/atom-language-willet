@@ -1,7 +1,7 @@
 {
   "name": "atom-language-willet",
   "main": "./lib/atom-language-willet",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Provides highlighting for the Willet Language",
   "keywords": [
     "willet"
